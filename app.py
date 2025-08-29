@@ -1,7 +1,3 @@
-# Write a clean, self-contained Streamlit app with no generator code and no undefined variables.
-from pathlib import Path
-
-code = r'''
 # app.py
 # Streamlit — Diagnostic orienté besoins (SWOT) pour cabinet d'expertise comptable
 # Objectif : Diagnostiquer, détecter des besoins précis, les rattacher aux services/offres,
@@ -481,7 +477,3 @@ with st.expander("📚 Cartographie offres internes (référence)"):
         st.markdown("---")
 
 st.caption("💡 Cet outil est centré sur le diagnostic. Les prix, si souhaités, peuvent être gérés ailleurs. Ajoutez vos règles métier et modèles d'e-mails propres au cabinet.")
-'''
-Path("/mnt/data/app.py").write_text(code, encoding="utf-8")
-
-"/mnt/data/app.py"

@@ -1,5 +1,5 @@
 # app.py
-# Streamlit — Diagnostic orienté besoins (SWOT) pour cabinet d'expertise comptable
+# Streamlit — Diagnostic orienté besoins (SWOT) pour construire une offre de service commerciale
 # Objectif : Diagnostiquer, détecter des besoins précis, les rattacher aux services/offres,
 # puis générer des "événements" (emails/export) vers les pôles concernés.
 # Lancer : streamlit run app.py

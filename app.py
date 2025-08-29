@@ -294,7 +294,7 @@ def zip_emails(emails: List[Dict[str, Any]], client_name: str) -> bytes:
 # UI — Paramètres & profil
 # =====================================
 
-st.title("🧭 Diagnostic orienté besoins — Cabinet d'expertise comptable")
+st.title("🧭 Diagnostic orienté besoins pour la construction d'une offre commerciale")
 st.caption("Structure SWOT adaptée → détection de besoins → rattachement services → génération d'événements.")
 
 with st.sidebar:

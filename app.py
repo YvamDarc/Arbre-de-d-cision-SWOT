@@ -1,18 +1,17 @@
-# Re-write the file (previous state reset cleared it)
+# Write a clean, self-contained Streamlit app with no generator code and no undefined variables.
 from pathlib import Path
 
-app_diag = r'''
-# app_diagnostic.py
+code = r'''
+# app.py
 # Streamlit — Diagnostic orienté besoins (SWOT) pour cabinet d'expertise comptable
-# Objectif : Diagnostiquer, détecter des besoins précis, les rattacher aux services/ offres,
+# Objectif : Diagnostiquer, détecter des besoins précis, les rattacher aux services/offres,
 # puis générer des "événements" (emails/export) vers les pôles concernés.
-# Lancer : streamlit run app_diagnostic.py
+# Lancer : streamlit run app.py
 
 import streamlit as st
 from dataclasses import dataclass, asdict
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 import datetime
-import json
 import pandas as pd
 from io import BytesIO, StringIO
 import textwrap
@@ -97,8 +96,7 @@ class ClientProfile:
     btp_specifique: bool
     ecommerce_plateformes: bool
     risques_juridiques: bool
-    # notes libres
-    notes: str
+    notes: str  # notes libres
 
 @dataclass
 class Need:
@@ -193,8 +191,8 @@ def detect_needs(p: ClientProfile, swot: Dict[str, List[Dict[str, Any]]]) -> Lis
         ))
 
     # Règles issues des faiblesses/menaces
-    fb_texts = [x["texte"] for x in swot["Faiblesses"]]
-    m_texts = [x["texte"] for x in swot["Menaces"]]
+    fb_texts = [x["texte"] for x in swot.get("Faiblesses", [])]
+    m_texts = [x["texte"] for x in swot.get("Menaces", [])]
 
     if "Maturité digitale faible (risque d'erreurs/coûts)" in fb_texts:
         add("Cartographie & plan de digitalisation", "digital", "Moyenne", "6-12 mois", 3, "Digitalisation faible détectée")
@@ -215,13 +213,13 @@ def detect_needs(p: ClientProfile, swot: Dict[str, List[Dict[str, Any]]]) -> Lis
         add("Revue TVA (OSS/IOSS) & procédures", "international", "Haute", "Immédiat (≤ 3 mois)", 4, "Risque TVA marketplaces")
 
     # Opportunités
-    if any("Préparer la transmission / retraite dirigeant" in x["texte"] for x in swot["Opportunités"]):
+    if any("Préparer la transmission / retraite dirigeant" in x["texte"] for x in swot.get("Opportunités", [])):
         add("Bilan retraite & pré-étude de transmission", "patrimonial", "Moyenne", "6-12 mois", 3, "Fenêtre d'opportunité transmission")
-    if any("Optimisation patrimoniale" in x["texte"] for x in swot["Opportunités"]):
+    if any("Optimisation patrimoniale" in x["texte"] for x in swot.get("Opportunités", [])):
         add("Bilan patrimonial dirigeant", "patrimonial", "Moyenne", "6-12 mois", 3, "Patrimoine dirigeant important")
-    if any("Développement export" in x["texte"] for x in swot["Opportunités"]):
+    if any("Développement export" in x["texte"] for x in swot.get("Opportunités", [])):
         add("Diagnostic international (TVA / flux / implantations)", "international", "Moyenne", "6-12 mois", 3, "Opportunité export")
-    if any("Valorisation via la démarche RSE" in x["texte"] for x in swot["Opportunités"]):
+    if any("Valorisation via la démarche RSE" in x["texte"] for x in swot.get("Opportunités", [])):
         add("Reporting extra-financier simplifié", "rse", "Basse", "> 12 mois", 2, "Créer de la valeur via RSE")
 
     # Social / RH (induit par taille/obligations)
@@ -231,7 +229,7 @@ def detect_needs(p: ClientProfile, swot: Dict[str, List[Dict[str, Any]]]) -> Lis
         else:
             add("Optimisation processus paie/RH", "social", "Moyenne", "6-12 mois", 3, "Effectif significatif")
 
-    # Fiscal — détection simple via ecommerce/international/complexité
+    # Fiscal — détection via ecommerce/international
     if p.ecommerce_plateformes or p.exposition_internationale in ("Occasionnelle", "Régulière/Structurée"):
         add("Revue fiscale ciblée (TVA, prix de transfert simplifiés)", "fiscal", "Moyenne", "6-12 mois", 3, "Flux e-commerce/internationaux")
 
@@ -274,7 +272,7 @@ def make_email(service_email: str, client_name: str, row: Dict[str, Any]) -> Dic
         "Merci de revenir vers le chargé de dossier pour planifier la prise en charge."
     ]
     body = "\n".join(body_lines)
-    # .eml minimal (RFC simplifiée pour un brouillon)
+    # .eml minimal (brouillon local)
     eml = textwrap.dedent(f"""\
     From: diagnostic@cabinet.com
     To: {service_email}
@@ -287,7 +285,7 @@ def make_email(service_email: str, client_name: str, row: Dict[str, Any]) -> Dic
     return {"to": service_email, "subject": subject, "body": body, "eml": eml}
 
 def zip_emails(emails: List[Dict[str, Any]], client_name: str) -> bytes:
-    import zipfile, os, tempfile
+    import zipfile
     tmp = BytesIO()
     with zipfile.ZipFile(tmp, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
         for i, em in enumerate(emails, start=1):
@@ -463,7 +461,7 @@ with colC:
                     break
             if not svc_email:
                 svc_email = "info@cabinet.com"
-            em = make_email(svc_email, profile.nom, row)
+            em = make_email(svc_email, profile.nom, row.to_dict())
             emails.append(em)
 
         # ZIP .eml
@@ -484,6 +482,6 @@ with st.expander("📚 Cartographie offres internes (référence)"):
 
 st.caption("💡 Cet outil est centré sur le diagnostic. Les prix, si souhaités, peuvent être gérés ailleurs. Ajoutez vos règles métier et modèles d'e-mails propres au cabinet.")
 '''
+Path("/mnt/data/app.py").write_text(code, encoding="utf-8")
 
-Path(app_diag_path).write_text(app_diag, encoding="utf-8")
-app_diag_path, Path(app_diag_path).exists()
+"/mnt/data/app.py"
